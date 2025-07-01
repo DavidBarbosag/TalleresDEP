@@ -7,6 +7,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.context.annotation.Bean;
+
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,5 +51,40 @@ public class RelationalDataAccessApplication implements CommandLineRunner {
                         "SELECT id, first_name, last_name FROM customers WHERE first_name = ?",
                         (rs, rowNum) -> new Customer(rs.getLong("id"), rs.getString("first_name"), rs.getString("last_name")), "Josh")
                 .forEach(customer -> log.info(customer.toString()));
+    }
+
+    @Bean
+    public CommandLineRunner demo(CustomerRepository repository) {
+        return (args) -> {
+            // save a few customers
+            repository.save(new CustomerJPA("Jack", "Bauer"));
+            repository.save(new CustomerJPA("Chloe", "O'Brian"));
+            repository.save(new CustomerJPA("Kim", "Bauer"));
+            repository.save(new CustomerJPA("David", "Palmer"));
+            repository.save(new CustomerJPA("Michelle", "Dessler"));
+
+            // fetch all customers
+            log.info("Customers found with findAll():");
+            log.info("-------------------------------");
+            repository.findAll().forEach(customer -> {
+                log.info(customer.toString());
+            });
+            log.info("");
+
+            // fetch an individual customer by ID
+            CustomerJPA customer = repository.findById(1L);
+            log.info("Customer found with findById(1L):");
+            log.info("--------------------------------");
+            log.info(customer.toString());
+            log.info("");
+
+            // fetch customers by last name
+            log.info("Customer found with findByLastName('Bauer'):");
+            log.info("--------------------------------------------");
+            repository.findByLastName("Bauer").forEach(bauer -> {
+                log.info(bauer.toString());
+            });
+            log.info("");
+        };
     }
 }
