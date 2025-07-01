@@ -26,6 +26,10 @@ public class RelationalDataAccessApplication implements CommandLineRunner {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private CustomerMongoRepository repository;
+
+
     @Override
     public void run(String... strings) throws Exception {
 
@@ -51,6 +55,32 @@ public class RelationalDataAccessApplication implements CommandLineRunner {
                         "SELECT id, first_name, last_name FROM customers WHERE first_name = ?",
                         (rs, rowNum) -> new Customer(rs.getLong("id"), rs.getString("first_name"), rs.getString("last_name")), "Josh")
                 .forEach(customer -> log.info(customer.toString()));
+
+        repository.deleteAll();
+
+        // save a couple of customers
+        repository.save(new CustomerMongo("Alice", "Smith"));
+        repository.save(new CustomerMongo("Bob", "Smith"));
+
+        // fetch all customers
+        System.out.println("Customers found with findAll():");
+        System.out.println("-------------------------------");
+        for (CustomerMongo customer : repository.findAll()) {
+            System.out.println(customer);
+        }
+        System.out.println();
+
+        // fetch an individual customer
+        System.out.println("Customer found with findByFirstName('Alice'):");
+        System.out.println("--------------------------------");
+        System.out.println(repository.findByFirstName("Alice"));
+
+        System.out.println("Customers found with findByLastName('Smith'):");
+        System.out.println("--------------------------------");
+        for (CustomerMongo customer : repository.findByLastName("Smith")) {
+            System.out.println(customer);
+        }
+
     }
 
     @Bean

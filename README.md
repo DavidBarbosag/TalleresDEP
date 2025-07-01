@@ -140,6 +140,39 @@ public class RelationalDataAccessApplication implements CommandLineRunner {
 
 **Following this** [tutorial](https://spring.io/guides/gs/accessing-data-jpa)
 
+### Required Dependencies
+
+```uml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+</dependency>
+
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <scope>runtime</scope>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jdbc</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+```
+
+
+
 ### Define a Simple Entity
 
 ```java
@@ -273,3 +306,144 @@ public CommandLineRunner demo(CustomerRepository repository) {
 2025-07-01T11:20:44.065-05:00  INFO 16916 --- [TallerDEP] [           main] .e.A.T.T.RelationalDataAccessApplication :
 
 2025-07-01T11:20:44.065-05:00  INFO 16916 --- [TallerDEP] [           main] .e.A.T.T.RelationalDataAccessApplication : Customer found with findByLastName('Bauer'):
+
+
+## Accessing Data with MongoDB
+
+**Following this** [tutorial](https://spring.io/guides/gs/accessing-data-mongodb)
+
+### Required Dependencies
+
+```uml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+</dependency>
+
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <scope>runtime</scope>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jdbc</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-mongodb</artifactId>
+</dependency>
+```
+
+### Define a Simple Entity
+
+```
+package com.eci.ARSW.TalleresDEP.TallerDEP;
+
+import org.springframework.data.annotation.Id;
+
+
+public class CustomerMongo {
+
+    @Id
+    public String id;
+
+    public String firstName;
+    public String lastName;
+
+    public CustomerMongo() {}
+
+    public CustomerMongo(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "Customer[id=%s, firstName='%s', lastName='%s']",
+                id, firstName, lastName);
+    }
+}
+```
+
+### Create Simple Queries
+
+```
+package com.eci.ARSW.TalleresDEP.TallerDEP;
+
+import java.util.List;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+public interface CustomerMongoRepository extends MongoRepository<CustomerMongo, String> {
+
+    public CustomerMongo findByFirstName(String firstName);
+    public List<CustomerMongo> findByLastName(String lastName);
+
+}
+```
+
+### Complement the Application Class
+
+**In the override of run**
+
+```
+repository.deleteAll();
+
+// save a couple of customers
+repository.save(new CustomerMongo("Alice", "Smith"));
+repository.save(new CustomerMongo("Bob", "Smith"));
+
+// fetch all customers
+System.out.println("Customers found with findAll():");
+System.out.println("-------------------------------");
+for (CustomerMongo customer : repository.findAll()) {
+    System.out.println(customer);
+}
+System.out.println();
+
+// fetch an individual customer
+System.out.println("Customer found with findByFirstName('Alice'):");
+System.out.println("--------------------------------");
+System.out.println(repository.findByFirstName("Alice"));
+
+System.out.println("Customers found with findByLastName('Smith'):");
+System.out.println("--------------------------------");
+for (CustomerMongo customer : repository.findByLastName("Smith")) {
+    System.out.println(customer);
+}
+```
+
+### Results in command line
+
+Customers found with findAll():
+
+-------------------------------
+
+Customer[id=686410a280ae499bfabcf89e, firstName='Alice', lastName='Smith']
+
+Customer[id=686410a280ae499bfabcf89f, firstName='Bob', lastName='Smith']
+
+
+Customer found with findByFirstName('Alice'):
+
+--------------------------------
+
+Customer[id=686410a280ae499bfabcf89e, firstName='Alice', lastName='Smith']
+
+Customers found with findByLastName('Smith'):
+
+--------------------------------
+
+Customer[id=686410a280ae499bfabcf89e, firstName='Alice', lastName='Smith']
+
+Customer[id=686410a280ae499bfabcf89f, firstName='Bob', lastName='Smith']
