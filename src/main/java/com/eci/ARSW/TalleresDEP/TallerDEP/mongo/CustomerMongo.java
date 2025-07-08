@@ -1,4 +1,4 @@
-package com.eci.ARSW.TalleresDEP.TallerDEP;
+package com.eci.ARSW.TalleresDEP.TallerDEP.mongo;
 
 import org.springframework.data.annotation.Id;
 
